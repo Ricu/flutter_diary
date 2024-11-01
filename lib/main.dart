@@ -9,10 +9,9 @@ import 'pages/insights/main_insights.dart';
 import 'pages/journal/main_journal.dart';
 import 'pages/settings/main_settings.dart';
 import 'theme.dart';
-import 'pages/record/transcription_screen.dart'; // Create this new file for TranscriptionScreen
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:io';
+
 
 void main() async{
   await dotenv.load(fileName: ".env");
