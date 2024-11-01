@@ -12,10 +12,10 @@ class MainJournal extends StatefulWidget {
 }
 
 class _MainJournalState extends State<MainJournal> {
-  List<Map<String, String>> _journalEntries = []; // Store content and date
+  final List<Map<String, String>> _journalEntries = []; // Store content and date
   bool _isLoading = true;
   bool _isLoadingMore = false; // To track if more items are being loaded
-  int _currentBatchSize = 10; // Number of items to load per batch
+  final int _currentBatchSize = 10; // Number of items to load per batch
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -91,6 +91,7 @@ class _MainJournalState extends State<MainJournal> {
     }
   }
 
+  
   @override
   Widget build(BuildContext context) {
     return _isLoading
@@ -108,27 +109,8 @@ class _MainJournalState extends State<MainJournal> {
                           ? const Center(child: CircularProgressIndicator())
                           : const SizedBox.shrink();
                     }
-
                     final entry = _journalEntries[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                      child: ListTile(
-                        title: Text(
-                          entry['date'] ?? 'Unknown Date',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => JournalEntryDetailView(
-                                content: entry['content'] ?? '',
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
+                    return _buildJournalEntryCard(entry, context);
                   },
                 ),
               ),
@@ -139,5 +121,27 @@ class _MainJournalState extends State<MainJournal> {
                 ),
             ],
           );
+  }
+
+  Card _buildJournalEntryCard(Map<String, String> entry, BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      child: ListTile(
+        title: Text(
+          entry['date'] ?? 'Unknown Date',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => JournalEntryDetailView(
+                content: entry['content'] ?? '',
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 }
