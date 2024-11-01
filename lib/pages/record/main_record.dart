@@ -42,7 +42,12 @@ class MainRecord extends StatelessWidget {
                 width: MediaQuery.of(context).size.width * 0.8,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: onPressed2,
+                  onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/recorder/mt/start',
+                      );
+                  },
                   child: Text(buttonText2),
                 ),
               ),

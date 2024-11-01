@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'recorder.dart';
-import 'transcription_screen.dart';
+import 'edit_screen.dart';
 import '/utils/transcribe.dart';
 import '/utils/llm_prettifying.dart';
 
@@ -38,7 +38,7 @@ class _StRecordingFlowState extends State<StRecordingFlow> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => TranscriptionScreen(
+          builder: (context) => EditScreen(
             transcription: transcription,
             onContinue: _processTranscription,
           ),
@@ -72,7 +72,7 @@ class _StRecordingFlowState extends State<StRecordingFlow> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => TranscriptionScreen(
+          builder: (context) => EditScreen(
             transcription: processedText,
             onContinue: _handleFinalContinue,
           ),

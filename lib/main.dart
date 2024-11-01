@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_application_2/pages/people/main_people.dart';
 import 'package:flutter_application_2/pages/record/main_record.dart';
 import 'package:flutter_application_2/pages/record/st_record_flow.dart';
+import 'package:flutter_application_2/pages/record/mt_record_flow.dart';
 
 import 'pages/record/recorder.dart'; // Assuming this contains the Recorder widget
 import 'pages/insights/main_insights.dart';
@@ -36,7 +37,8 @@ class MainApp extends StatelessWidget {
         '/': (context) => const HomeScreen(),
         '/settings': (context) => const MainSettings(),
         '/recorder/st/start': (context) => StRecordingFlow(),
-        // '/edit_transcription': (context) => const TranscriptionScreen(),
+        '/recorder/mt/start': (context) => CategoryHomeScreen(),
+        // '/edit_transcription': (context) => const EditScreen(),
       },
       initialRoute: '/',
     );
