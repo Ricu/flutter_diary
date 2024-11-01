@@ -1,12 +1,12 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 Future<String> transcribeAudio(String filePath) async {
     final url = Uri.parse("https://api.openai.com/v1/audio/transcriptions");
 
     var request = http.MultipartRequest("POST", url);
     request.files.add(await http.MultipartFile.fromPath("file", filePath));
-    const String openAiKey = String.fromEnvironment('OPENAI_API_KEY', defaultValue: '');
+    String openAiKey = dotenv.get('OPENAI_API_KEY', fallback: '');
     request.headers.addAll({
       "Authorization": "Bearer $openAiKey",
     });

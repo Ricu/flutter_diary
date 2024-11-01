@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 
 
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'platform/audio_recorder_platform.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -75,7 +75,7 @@ class _RecorderState extends State<Recorder> with AudioRecorderMixin {
     var request = http.MultipartRequest("POST", url);
     request.files.add(await http.MultipartFile.fromPath("file", filePath));
     
-    const String openAiKey = String.fromEnvironment('OPENAI_API_KEY', defaultValue: '');
+    String openAiKey = dotenv.get('OPENAI_API_KEY', fallback: '');
     request.headers.addAll({
       "Authorization": "Bearer $openAiKey",
     });

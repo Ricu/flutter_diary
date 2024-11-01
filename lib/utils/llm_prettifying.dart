@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 class LlmPrettifying {
   static const String _openAiUrl = 'https://api.openai.com/v1/chat/completions';
-  static const String _openAiKey = String.fromEnvironment('OPENAI_API_KEY', defaultValue: ''); // Load from environment variables
+  static String openAiKey = dotenv.get('OPENAI_API_KEY', fallback: '');
 
   static const List<String> _categories = [
     "Health & Symptoms",
@@ -36,7 +38,7 @@ Please improve this diary entry:
         Uri.parse(_openAiUrl),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_openAiKey',
+          'Authorization': 'Bearer $openAiKey',
         },
         body: jsonEncode({
           'model': 'gpt-4',
