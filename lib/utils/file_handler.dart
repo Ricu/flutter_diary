@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:platform/platform.dart';
 import 'package:path/path.dart' as path;
+import 'package:intl/intl.dart';
 // ···
 
 Future<String> get _appDocsPath async {
@@ -13,13 +14,13 @@ Future<String> get _appDocsPath async {
 Future<String> get _datetimeNowFolderPath async {
     final docPath = await _appDocsPath;
     final now = DateTime.now();
-    final folderName = '${now.year}${now.month}${now.day}';
+    final folderName = DateFormat('yyyyMMdd').format(now);
     return '${docPath}/${folderName}';
 }
 
 String get _datetimeNowFileName {
     final now = DateTime.now();
-    return '${now.year}${now.month}${now.day}-${now.hour}${now.minute}${now.second}';
+    return DateFormat('yyyyMMdd-HHmmss').format(now);
 }
 
 Future<String> get datetimeNowFilePath async {
@@ -50,7 +51,7 @@ Future<List<File>> getLatestTextFiles(int numFiles, int start) async {
       .whereType<Directory>()
       .where((dir) => RegExp(r'^\d{8}$').hasMatch(dir.path.split('/').last))
       .toList();
-
+  print("Number of date folders: ${dateFolders.length}");
   // Sort folders in descending order based on their date in folder name
   dateFolders.sort((a, b) => b.path.compareTo(a.path));
 
@@ -71,7 +72,7 @@ Future<List<File>> getLatestTextFiles(int numFiles, int start) async {
     // Add files from this folder to allFiles
     allFiles.addAll(filesInFolder);
   }
-  print("Number of files: ${allFiles.length}");
+  
   // Add `numFiles` files to the list of latest files, starting from the one with index `start`
   final latestFiles = <File>[];
   for (int i = start; i < start + numFiles && i < allFiles.length; i++) {
