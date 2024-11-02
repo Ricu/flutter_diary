@@ -6,10 +6,10 @@ class EditScreen extends StatefulWidget {
   final Function(String) onContinue;
   
   const EditScreen({
-    Key? key, 
+    super.key, 
     required this.transcription, 
     required this.onContinue
-  }) : super(key: key);
+  });
 
   @override
   State<EditScreen> createState() => _EditScreenState();

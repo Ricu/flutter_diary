@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/pages/record/recorder.dart';
 
 class MainRecord extends StatelessWidget {
   final String titleText = 'Record Your Day';

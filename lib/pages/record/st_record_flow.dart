@@ -1,3 +1,5 @@
+// ignore_for_file: use_super_parameters
+
 import 'package:flutter/material.dart';
 import 'recorder.dart';
 import 'edit_screen.dart';
@@ -14,9 +16,6 @@ class StRecordingFlow extends StatefulWidget {
 }
 
 class _StRecordingFlowState extends State<StRecordingFlow> {
-  String? _recordedFilePath;
-  String? _transcription;
-  String? _processedText;
   bool _isLoading = false;  // Add loading state
 
   void _transcribeAudio(String path) async {
@@ -24,13 +23,11 @@ class _StRecordingFlowState extends State<StRecordingFlow> {
 
     setState(() {
       _isLoading = true;
-      _recordedFilePath = path;
     });
 
     try {
       String transcription = await transcribeAudio(path);  // Use path directly
       setState(() {
-        _transcription = transcription;
         _isLoading = false;
       });
 
@@ -58,13 +55,11 @@ class _StRecordingFlowState extends State<StRecordingFlow> {
   void _processTranscription(String editedTranscription) async {
     setState(() {
       _isLoading = true;
-      _transcription = editedTranscription;
     });
 
     try {
       String processedText = await LlmPrettifying.prettifySingleRecording(editedTranscription);
       setState(() {
-        _processedText = processedText;
         _isLoading = false;
       });
 
