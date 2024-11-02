@@ -131,6 +131,7 @@ class _MainJournalState extends State<MainJournal> {
           entry['date'] ?? 'Unknown Date',
           style: Theme.of(context).textTheme.bodyLarge,
         ),
+        trailing: const Icon(Icons.arrow_forward),
         onTap: () {
           Navigator.push(
             context,

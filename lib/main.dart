@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_application_2/pages/people/main_people.dart';
 import 'package:flutter_application_2/pages/record/main_record.dart';
 import 'package:flutter_application_2/pages/record/st_record_flow.dart';
 import 'package:flutter_application_2/pages/record/mt_record_flow.dart';
-
-import 'pages/record/recorder.dart'; // Assuming this contains the Recorder widget
 import 'pages/insights/main_insights.dart';
 import 'pages/journal/main_journal.dart';
 import 'pages/settings/main_settings.dart';
@@ -36,9 +33,8 @@ class MainApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomeScreen(),
         '/settings': (context) => const MainSettings(),
-        '/recorder/st/start': (context) => StRecordingFlow(),
-        '/recorder/mt/start': (context) => CategoryHomeScreen(),
-        // '/edit_transcription': (context) => const EditScreen(),
+        '/recorder/st/start': (context) => const StRecordingFlow(),
+        '/recorder/mt/start': (context) => const CategoryHomeScreen(),
       },
       initialRoute: '/',
     );
@@ -47,64 +43,72 @@ class MainApp extends StatelessWidget {
 
 // This is your home screen widget that will hold the bottom navigation bar and the Recorder
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 1;
+  int _currentIndex = 2;
 
+  final List<Map<String, dynamic>> appSections = [
+    {
+      'name': 'Journal',
+      'widget': const MainJournal(),
+      'icon': Icons.book_outlined,
+    },
+    {
+      'name': 'Insights',
+      'widget': const MainInsights(),
+      'icon': Icons.assessment_outlined,
+    },
+    {
+      'name': 'Recorder Home',
+      'widget': const MainRecord(),
+      'icon': Icons.home_outlined,
+    },
+    {
+      'name': 'People',
+      'widget': const MainPeople(),
+      'icon': Icons.people_outlined,
+    },
+    {
+      'name': 'Settings',
+      'widget': const MainSettings(),
+      'icon': Icons.settings,
+    }
+  ];
+
+  List<BottomNavigationBarItem> getNavigationBarItems() {
+    return appSections.map((section) {
+      return BottomNavigationBarItem(
+        icon: Icon(section['icon']),
+        label: section['name'],
+      );
+    }).toList();
+  }
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Life Tracker'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Open settings',
-            onPressed: () {
-              Navigator.pushNamed(context, '/settings');
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.settings),
+        //     tooltip: 'Open settings',
+        //     onPressed: () {
+        //       Navigator.pushNamed(context, '/settings');
+        //     },
+        //   ),
+        // ],
       ),
-      body: _buildBody(),
+      body: appSections[_currentIndex]['widget'],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book_outlined),
-            label: 'Journal',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.people_outlined, 
-              // color: Theme.of(context).colorScheme.secondary
-            ),
-            label: 'People',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home_outlined, 
-              // color: Theme.of(context).colorScheme.secondary
-            ),
-            label: 'Recorder Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.mic_outlined, 
-              // color: Theme.of(context).colorScheme.secondary
-            ),
-            label: 'Recorder',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assessment_outlined),
-            label: 'Insights',
-          ),
-        ],
+        items: getNavigationBarItems(),
         currentIndex: _currentIndex,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
         onTap: (index) {
@@ -114,27 +118,5 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
     );
-  }
-
-  Widget _buildBody() {
-    // You can add more cases for different screens like Home, Journal, etc.
-    switch (_currentIndex) {
-      case 0:
-        return MainJournal();
-      case 1:
-        return MainPeople();
-      case 2:
-        return MainRecord();
-      case 3:
-        return Recorder(
-            onStop: (path) {
-              if (kDebugMode) print('Recorded file path: $path');
-            },
-          );
-      case 4:
-        return MainInsights();
-      default:
-        return Recorder(onStop: (path) {},);
-    }
   }
 }

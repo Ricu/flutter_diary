@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class EditScreen extends StatefulWidget {
   final String transcription;
@@ -88,10 +89,14 @@ class _EditScreenState extends State<EditScreen> {
                     ),
                   )
                 : SingleChildScrollView(
-                    child: Text(
-                      _content,
-                      style: const TextStyle(fontSize: 16),
+                    child : MarkdownBody(
+                      data: _content,
+                      selectable: true,
                     ),
+                    // child: Text(
+                    //   _content,
+                    //   style: const TextStyle(fontSize: 16),
+                    // ),
                   ),
           ),
           SizedBox(

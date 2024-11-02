@@ -1,8 +1,5 @@
 // home_screen.dart
 import 'package:flutter/material.dart';
-// import 'package:flutter_icons/flutter_icons.dart'; // You'll need to add this package
-
-import 'package:flutter/material.dart';
 import 'recorder.dart';
 import 'edit_screen.dart';
 import '/utils/transcribe.dart';
@@ -12,7 +9,7 @@ import '../../utils/file_handler.dart';
 
 
 class CategoryHomeScreen extends StatefulWidget {
-  const CategoryHomeScreen({Key? key}) : super(key: key);
+  const CategoryHomeScreen({super.key});
 
   @override
   State<CategoryHomeScreen> createState() => _CategoryHomeScreenState();
@@ -316,15 +313,27 @@ class _CategoryRecordingFlowState extends State<CategoryRecordingFlow> {
       appBar: AppBar(
         title: Text('Recording: ${widget.category}'),
       ),
-      body: Stack(
-        children: [
-          Recorder(onStop: _transcribeAudio),
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
-        ],
-      ),
+      body: _isLoading ?
+        const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Transcribing your memo...'),
+            ],
+          ),
+        ) : 
+        Recorder(onStop: _transcribeAudio)
+      // Stack(
+      //   children: [
+      //     Recorder(onStop: _transcribeAudio),
+      //     if (_isLoading)
+      //       const Center(
+      //         child: CircularProgressIndicator(),
+      //       ),
+      //   ],
+      // ),
     );
   }
 }
