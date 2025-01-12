@@ -6,6 +6,7 @@ import 'package:flutter_application_2/pages/record/mt_record_flow.dart';
 import 'pages/insights/main_insights.dart';
 import 'pages/journal/main_journal.dart';
 import 'pages/settings/main_settings.dart';
+import 'test.dart';
 import 'theme.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -33,8 +34,8 @@ class MainApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomeScreen(),
         '/settings': (context) => const MainSettings(),
-        '/recorder/st/start': (context) => const StRecordingFlow(),
-        '/recorder/mt/start': (context) => const CategoryHomeScreen(),
+        '/recorder/st/start': (context) => StRecordingFlow(selectedDate: ModalRoute.of(context)!.settings.arguments as DateTime),
+        '/recorder/mt/start': (context) => CategoryHomeScreen(selectedDate: ModalRoute.of(context)!.settings.arguments as DateTime),
       },
       initialRoute: '/',
     );
@@ -66,11 +67,11 @@ class _HomeScreenState extends State<HomeScreen> {
     {
       'name': 'Recorder Home',
       'widget': const MainRecord(),
-      'icon': Icons.home_outlined,
+      'icon': Icons.add_box_outlined,
     },
     {
       'name': 'People',
-      'widget': const MainPeople(),
+      'widget': const MainTest(), //const MainPeople(),
       'icon': Icons.people_outlined,
     },
     {

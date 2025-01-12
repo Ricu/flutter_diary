@@ -1,15 +1,18 @@
 // home_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_sound/public/util/enum_helper.dart';
 import 'recorder.dart';
 import 'edit_screen.dart';
 import '/utils/transcribe.dart';
 import '/utils/llm_prettifying.dart';
-
-import '../../utils/file_handler.dart';
+import 'package:intl/intl.dart'; // For date formatting
+import '/utils/file_handler.dart';
+import '/utils/data_models.dart';
 
 
 class CategoryHomeScreen extends StatefulWidget {
-  const CategoryHomeScreen({super.key});
+  final DateTime selectedDate;
+  const CategoryHomeScreen({super.key, required this.selectedDate});
 
   @override
   State<CategoryHomeScreen> createState() => _CategoryHomeScreenState();
@@ -19,71 +22,46 @@ class _CategoryHomeScreenState extends State<CategoryHomeScreen> {
   // Track recordings made in current session
   final Map<String, List<String>> _sessionRecordings = {};
   
-  // Category definitions with icons
-  final List<Map<String, dynamic>> categories = [
-    {
-      'name': 'Health & Symptoms',
-      'icon': Icons.favorite,
-      'colorSeed': Colors.red,
-    },
-    {
-      'name': 'Physical Activity',
-      'icon': Icons.directions_run,
-      'colorSeed': Colors.green,
-    },
-    {
-      'name': 'Daily Activities & Social Interactions',
-      'icon': Icons.people,
-      'colorSeed': Colors.blue,
-    },
-    {
-      'name': 'Reflections & Ideas',
-      'icon': Icons.lightbulb,
-      'colorSeed': Colors.yellow,
-    },
-    {
-      'name': 'Meals & Nutrition',
-      'icon': Icons.restaurant,
-      'colorSeed': Colors.orange,
-    },
-    {
-      'name': 'Mood Tracker',
-      'icon': Icons.emoji_emotions,
-      'colorSeed': Colors.purple,
-    },
-    {
-      'name': 'Sleep Patterns',
-      'icon': Icons.bedtime,
-      'colorSeed': Colors.indigo,
-    },
-    {
-      'name': 'Miscellaneous Notes',
-      'icon': Icons.note,
-      'colorSeed': Colors.grey,
-    },
-  ];
+  late DiaryEntry _diaryEntry;
+
+  @override
+  void initState() {
+    super.initState();
+    _createBlankEntry();
+  }
+
+  void _createBlankEntry() async {
+    final diaryEntryId = await insertDiaryEntry(DiaryEntry(date: widget.selectedDate)); // Create new entry with selected date
+    final retrievedEntry = await getDiaryEntry(diaryEntryId);
+    if (retrievedEntry != null) {
+        _diaryEntry = retrievedEntry;
+    }
+  }
+
+  final List<Category> categories = Category.getAllCategories();
 
   int getRecordingCount(String category) {
     return _sessionRecordings[category]?.length ?? 0;
   }
 
-  void _handleRecordingComplete(String category, String transcribedText) {
+  void _handleRecordingComplete(Category category, String transcribedText) {
     setState(() {
       _sessionRecordings.update(
-        category,
+        category.identifier,
         (list) => list..add(transcribedText),
         ifAbsent: () => [transcribedText],
       );
     });
   }
 
-  void _startRecording(String category) {
+  void _startRecording(Category category) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CategoryRecordingFlow(
           category: category,
           onComplete: (String transcribedText) => _handleRecordingComplete(category, transcribedText),
+          selectedDate: widget.selectedDate,
         ),
       ),
     );
@@ -103,6 +81,7 @@ class _CategoryHomeScreenState extends State<CategoryHomeScreen> {
       MaterialPageRoute(
         builder: (context) => ProcessAllRecordingsScreen(
           recordings: _sessionRecordings,
+          selectedDate: widget.selectedDate,
         ),
       ),
     );
@@ -112,10 +91,11 @@ class _CategoryHomeScreenState extends State<CategoryHomeScreen> {
   Widget build(BuildContext context) {
     // final theme = Theme.of(context);
     // final isDark = theme.brightness == Brightness.dark;
+    String formattedDate = DateFormat('MMMM dd, yyyy').format(widget.selectedDate);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Journal'),
+        title: Text('Recording: $formattedDate'),
       ),
       body: Column(
         children: [
@@ -131,14 +111,14 @@ class _CategoryHomeScreenState extends State<CategoryHomeScreen> {
               itemCount: categories.length,
               itemBuilder: (context, index) {
                 final category = categories[index];
-                final recordingCount = getRecordingCount(category['name']);
+                final recordingCount = getRecordingCount(category.identifier);
                 
                 return CategoryTile(
-                  name: category['name'],
-                  icon: category['icon'],
-                  colorSeed: category['colorSeed'],
+                  name: category.displayName,
+                  icon: category.icon,
+                  colorSeed: category.colorSeed,
                   recordingCount: recordingCount,
-                  onTap: () => _startRecording(category['name']),
+                  onTap: () => _startRecording(category),
                 );
               },
             ),
@@ -171,13 +151,13 @@ class CategoryTile extends StatelessWidget {
   final VoidCallback onTap;
 
   const CategoryTile({
-    Key? key,
+    super.key,
     required this.name,
     required this.icon,
     required this.colorSeed,
     required this.recordingCount,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -248,14 +228,16 @@ class CategoryTile extends StatelessWidget {
 
 // category_recording_flow.dart
 class CategoryRecordingFlow extends StatefulWidget {
-  final String category;
+  final Category category;
   final Function(String) onComplete;
+  final DateTime selectedDate;
 
   const CategoryRecordingFlow({
-    Key? key,
+    super.key,
     required this.category,
     required this.onComplete,
-  }) : super(key: key);
+    required this.selectedDate,
+  });
 
   @override
   State<CategoryRecordingFlow> createState() => _CategoryRecordingFlowState();
@@ -265,6 +247,22 @@ class _CategoryRecordingFlowState extends State<CategoryRecordingFlow> {
   // String? _recordedFilePath;
   // String? _transcription;
   bool _isLoading = false;
+
+  String _recorderOutputPath = 'placeholder';
+
+  
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecorderOutputPath();
+  }
+
+  void _fetchRecorderOutputPath() async {
+    final String recordingOutputPath = await getRecordingOutputPath(widget.selectedDate);
+    setState(() {
+      _recorderOutputPath = recordingOutputPath;
+    });
+  }
 
   void _transcribeAudio(String path) async {
     if (path.isEmpty) return;
@@ -311,7 +309,7 @@ class _CategoryRecordingFlowState extends State<CategoryRecordingFlow> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Recording: ${widget.category}'),
+        title: Text('Recording: ${widget.category.displayName}'),
       ),
       body: _isLoading ?
         const Center(
@@ -324,16 +322,10 @@ class _CategoryRecordingFlowState extends State<CategoryRecordingFlow> {
             ],
           ),
         ) : 
-        Recorder(onStop: _transcribeAudio)
-      // Stack(
-      //   children: [
-      //     Recorder(onStop: _transcribeAudio),
-      //     if (_isLoading)
-      //       const Center(
-      //         child: CircularProgressIndicator(),
-      //       ),
-      //   ],
-      // ),
+        Recorder(
+          onStop: _transcribeAudio,
+          outputPath : _recorderOutputPath
+        )
     );
   }
 }
@@ -341,11 +333,13 @@ class _CategoryRecordingFlowState extends State<CategoryRecordingFlow> {
 // process_all_recordings_screen.dart
 class ProcessAllRecordingsScreen extends StatefulWidget {
   final Map<String, List<String>> recordings;
+  final DateTime selectedDate;
 
   const ProcessAllRecordingsScreen({
-    Key? key,
+    super.key,
     required this.recordings,
-  }) : super(key: key);
+    required this.selectedDate
+  });
 
   @override
   State<ProcessAllRecordingsScreen> createState() => _ProcessAllRecordingsScreenState();
@@ -415,7 +409,7 @@ class _ProcessAllRecordingsScreenState extends State<ProcessAllRecordingsScreen>
               ? EditScreen(
                   transcription: _processedResult!,
                   onContinue: (finalText) {
-                    saveText(finalText);
+                    saveText(finalText, widget.selectedDate);
                     // Navigate back to home and clear session
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },

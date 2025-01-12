@@ -12,7 +12,8 @@ import 'dart:convert';
 
 class Recorder extends StatefulWidget {
   final void Function(String path) onStop;
-  const Recorder({super.key, required this.onStop});
+  final String outputPath;
+  const Recorder({super.key, required this.onStop, required this.outputPath});
 
   @override
   State<Recorder> createState() => _RecorderState();
@@ -53,7 +54,7 @@ class _RecorderState extends State<Recorder> with AudioRecorderMixin {
         const config = RecordConfig(encoder: encoder, numChannels: 1);
 
         // Record to file
-        await recordFile(_audioRecorder, config);
+        await recordFile(_audioRecorder, config, widget.outputPath);
 
         // Record to stream
         // await recordStream(_audioRecorder, config);

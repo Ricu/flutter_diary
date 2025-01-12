@@ -5,11 +5,12 @@ import 'recorder.dart';
 import 'edit_screen.dart';
 import '/utils/transcribe.dart';
 import '/utils/llm_prettifying.dart';
-
+import 'package:intl/intl.dart';
 import '../../utils/file_handler.dart';
 
 class StRecordingFlow extends StatefulWidget {
-  const StRecordingFlow({Key? key}) : super(key: key);
+  final DateTime selectedDate;
+  const StRecordingFlow({super.key, required this.selectedDate});
 
   @override
   State<StRecordingFlow> createState() => _StRecordingFlowState();
@@ -18,6 +19,22 @@ class StRecordingFlow extends StatefulWidget {
 class _StRecordingFlowState extends State<StRecordingFlow> {
   bool _isLoading = false;  // Add loading state
 
+  String _recorderOutputPath = 'placeholder';
+
+  
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecorderOutputPath();
+  }
+
+  void _fetchRecorderOutputPath() async {
+    final String recordingOutputPath = await getRecordingOutputPath(widget.selectedDate);
+    setState(() {
+      _recorderOutputPath = recordingOutputPath;Navigator.of(context).popUntil((route) => route.isFirst);
+    });
+  }
+    
   void _transcribeAudio(String path) async {
     if (path.isEmpty) return;
 
@@ -87,16 +104,22 @@ class _StRecordingFlowState extends State<StRecordingFlow> {
   void _handleFinalContinue(String finalText) {
     // Here you can implement the final step of your flow
     print('Final text: $finalText');
-    saveText(finalText);
+    saveText(finalText, widget.selectedDate);
+    
   }
 
+  
   @override
   Widget build(BuildContext context) {
+    String formattedDate = DateFormat('MMMM dd, yyyy').format(widget.selectedDate);
     return Scaffold(
-      appBar: AppBar(title: const Text('Recording')),
+      appBar: AppBar(title: Text('Recording: ${formattedDate}')),
       body: Stack(
         children: [
-          Recorder(onStop: _transcribeAudio),
+          Recorder(
+            onStop: _transcribeAudio,
+            outputPath : _recorderOutputPath
+          ),
           if (_isLoading)
             const Center(
               child: CircularProgressIndicator(),
